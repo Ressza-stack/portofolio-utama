@@ -89,18 +89,10 @@
 
 /* ---------- 2. RESET & BASE ---------- */
 *, *::before, *::after{ box-sizing: border-box; }
-html{ scroll-behavior: smooth; }
+html{ scroll-behavior: smooth; background-color: var(--bg); transition: background-color .35s var(--ease); }
 body{
   margin: 0;
-  background-color: var(--bg);
-  /* Latar belakang lebih hidup: beberapa gumpalan warna lembut menyebar di halaman */
-  background-image: 
-    radial-gradient(at 12% 8%, color-mix(in srgb, var(--primary) 16%, transparent), transparent 45%),
-    radial-gradient(at 88% 12%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 42%),
-    radial-gradient(at 8% 82%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 45%),
-    radial-gradient(at 92% 88%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 45%),
-    radial-gradient(at 50% 50%, color-mix(in srgb, var(--primary-light) 6%, transparent), transparent 60%);
-  background-attachment: fixed;
+  background-color: transparent;
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 16px;
@@ -108,6 +100,52 @@ body{
   -webkit-font-smoothing: antialiased;
   transition: background-color .35s var(--ease), color .35s var(--ease);
   overflow-x: hidden;
+}
+
+/* ---------- ANIMATED BACKGROUND LAYERS ---------- */
+/* Lapisan gumpalan warna besar yang perlahan bergerak, membuat latar terasa hidup */
+body::before{
+  content: "";
+  position: fixed;
+  inset: -12%;
+  z-index: -2;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--primary) 22%, transparent), transparent 40%),
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 38%),
+    radial-gradient(circle at 24% 82%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 42%),
+    radial-gradient(circle at 86% 86%, color-mix(in srgb, var(--primary) 18%, transparent), transparent 42%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--primary-light) 10%, transparent), transparent 60%);
+  filter: blur(50px);
+  animation: bgFloat 24s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+/* Lapisan titik-titik kecil yang bergeser pelan, menambah kesan "terisi" tanpa ramai */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--primary) 45%, transparent) 1.6px, transparent 1.6px),
+    radial-gradient(circle, color-mix(in srgb, var(--accent) 45%, transparent) 1.6px, transparent 1.6px);
+  background-size: 130px 130px, 180px 180px;
+  background-position: 0 0, 65px 90px;
+  opacity: .32;
+  animation: sparkleDrift 50s linear infinite;
+  pointer-events: none;
+}
+@keyframes bgFloat{
+  0%{ transform: translate(0,0) scale(1) rotate(0deg); }
+  50%{ transform: translate(3%, -2%) scale(1.08) rotate(4deg); }
+  100%{ transform: translate(-2%, 3%) scale(1.04) rotate(-3deg); }
+}
+@keyframes sparkleDrift{
+  from{ background-position: 0 0, 65px 90px; }
+  to{ background-position: 130px 130px, 65px -90px; }
+}
+@media (prefers-reduced-motion: reduce){
+  body::before, body::after{ animation: none; }
 }
 img{ max-width: 100%; display: block; }
 a{ color: inherit; text-decoration: none; }
@@ -1033,4 +1071,40 @@ a.contact__row:hover{ border-color: var(--border-strong); transform: translateX(
 }
 .hero__blob{
   opacity: 0.35;
+}
+
+/* ---------- EXTRA "LIVELY" TOUCHES ---------- */
+/* Kilau bergerak di tombol utama saat hover */
+.btn--primary{ position: relative; overflow: hidden; }
+.btn--primary::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.4), transparent);
+  transform: translateX(-130%);
+  transition: transform .6s ease;
+}
+.btn--primary:hover::after{ transform: translateX(130%); }
+
+/* Denyut lembut pada glow foto hero */
+.hero__photo-glow{ animation: glowPulse 4.5s ease-in-out infinite; }
+@keyframes glowPulse{
+  0%,100%{ opacity: .4; transform: scale(1); }
+  50%{ opacity: .65; transform: scale(1.1); }
+}
+
+/* Ikon skill "melompat" kecil saat kartu dihover */
+.skill-card__icon{ transition: transform .35s var(--ease); }
+.skill-card:hover .skill-card__icon{ transform: scale(1.15) rotate(-6deg); }
+
+/* Tag proyek mengambang halus saat dihover */
+.project-card__tags span{ transition: transform .2s ease, background-color .2s ease, border-color .2s ease; }
+.project-card__tags span:hover{
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+}
+
+@media (prefers-reduced-motion: reduce){
+  .hero__photo-glow{ animation: none; }
 }
