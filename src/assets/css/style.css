@@ -762,7 +762,8 @@ input, textarea{ font-family: inherit; }
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  max-width: 760px;
+  max-width: 720px;      /* sebelumnya 760px → sama dengan lebar kartu timeline */
+  margin-left: 40px;     /* baru → tepi kiri sejajar dengan kartu timeline */
   padding: 24px;
   border-radius: var(--radius-md);
   background: var(--surface);
@@ -776,9 +777,9 @@ input, textarea{ font-family: inherit; }
   background: color-mix(in srgb, var(--primary) 14%, transparent);
   color: var(--primary-light);
 }
-.education-card h3{ font-size: 1.05rem; margin-bottom: 4px; }
-.education-card__org{ display: block; color: var(--text-muted); font-size: .86rem; margin-bottom: 10px; }
-.education-card p{ color: var(--text-secondary); font-size: .92rem; }
+.education-card h3{ font-size: 1.1rem; margin-bottom: 4px; }          /* sebelumnya 1.05rem */
+.education-card__org{ display: block; color: var(--text-muted); font-size: .88rem; margin-bottom: 12px; }  /* .86rem, 10px */
+.education-card p{ color: var(--text-secondary); font-size: .94rem; } /* sebelumnya .92rem */
 
 /* ---------- CONTACT ---------- */
 .contact__grid{
