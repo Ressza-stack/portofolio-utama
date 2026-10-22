@@ -1,14 +1,22 @@
-/* ==========================================================================
-   Alex Rivera — Portfolio
-   Vanilla JS: navbar, theme toggle, cursor, scroll progress, reveal
-   animations, typing effect, back-to-top, contact form.
-   ========================================================================== */
-
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ---------- Footer year ---------- */
   const yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* ---------- Throttle utility (rAF) for scroll handlers ---------- */
+  function throttle(fn) {
+    let ticking = false;
+    return function () {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          fn();
+          ticking = false;
+        });
+      }
+    };
+  }
 
   /* ---------- Navbar: scrolled state + active link ---------- */
   const navbar = document.getElementById('navbar');
@@ -18,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function onScroll() {
     navbar.classList.toggle('is-scrolled', window.scrollY > 24);
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', throttle(onScroll), { passive: true });
   onScroll();
 
   const navObserver = new IntersectionObserver((entries) => {
@@ -78,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
     progressBar.style.width = `${pct}%`;
   }
-  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('scroll', throttle(updateProgress), { passive: true });
   updateProgress();
 
   /* ---------- Custom cursor (desktop / fine pointer only) ---------- */
@@ -176,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ringCircle.style.strokeDashoffset = circumference - pct * circumference;
     backToTop.classList.toggle('is-visible', scrollTop > 480);
   }
-  window.addEventListener('scroll', updateBackToTop, { passive: true });
+  window.addEventListener('scroll', throttle(updateBackToTop), { passive: true });
   updateBackToTop();
 
   backToTop.addEventListener('click', () => {
@@ -212,5 +220,98 @@ document.addEventListener('DOMContentLoaded', () => {
     status.textContent = 'Thanks! This form is a front-end demo — connect it to your email service to receive messages.';
     form.reset();
   });
+
+  /* ---------- Smooth scroll with navbar offset ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', function (e) {
+      const targetId = this.getAttribute('href');
+      const target = document.querySelector(targetId);
+      if (!target || targetId.length <= 1) return;
+
+      e.preventDefault();
+      const navbarEl = document.getElementById('navbar');
+      const navOffset = navbarEl ? navbarEl.offsetHeight : 76;
+      const offsetTop = target.offsetTop - navOffset + 2;
+
+      if (prefersReducedMotion) {
+        window.scrollTo(0, offsetTop);
+      } else {
+        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+      }
+
+      // Close mobile menu after navigating
+      const navMenu = document.getElementById('navMenu');
+      const burger = document.getElementById('navBurger');
+      if (navMenu && navMenu.classList.contains('is-open')) {
+        navMenu.classList.remove('is-open');
+        burger.classList.remove('is-open');
+        burger.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
+  /* ---------- 3D parallax tilt on cards ---------- */
+  if (isFinePointer && !prefersReducedMotion) {
+    const tiltCards = document.querySelectorAll('.project-card, .skill-card, .cert-card, .timeline__card, .education-card');
+    const maxTilt = 8;
+
+    tiltCards.forEach((card) => {
+      card.style.willChange = 'transform';
+
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / rect.width;
+        const py = (e.clientY - rect.top) / rect.height;
+        const tiltX = (0.5 - py) * maxTilt;
+        const tiltY = (px - 0.5) * maxTilt;
+        card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.02)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+  }
+
+  /* ---------- Parallax depth on hero badges (scroll) ---------- */
+  {
+    const isMobileView = window.matchMedia('(max-width: 860px)').matches;
+    if (!prefersReducedMotion && !isMobileView) {
+      const parallaxEls = document.querySelectorAll('.hero__badge');
+      if (parallaxEls.length) {
+        function updateParallax() {
+          const scrollY = window.scrollY;
+          parallaxEls.forEach((el, i) => {
+            const speed = (i + 1) * 0.35;
+            const tx = scrollY * 0.012 * speed;
+            const ty = scrollY * 0.008 * speed;
+            el.style.transform = `translate(${tx}px, ${ty}px)`;
+          });
+        }
+
+        window.addEventListener('scroll', throttle(updateParallax), { passive: true });
+        updateParallax();
+      }
+    }
+  }
+
+  /* ---------- Magnetic hover on hero buttons & social links ---------- */
+  if (isFinePointer && !prefersReducedMotion) {
+    const magneticEls = document.querySelectorAll('.hero__actions .btn, .hero__social a');
+    const strength = 5;
+
+    magneticEls.forEach((el) => {
+      el.addEventListener('mousemove', (e) => {
+        const rect = el.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        el.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+      });
+
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = '';
+      });
+    });
+  }
 
 });

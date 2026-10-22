@@ -438,7 +438,11 @@ input, textarea{ font-family: inherit; }
   color: var(--primary-light);
   min-height: 1.6em;
   margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
+.hero__typed{ font-weight: 500; }
 .typed-cursor{ animation: blink 1s step-end infinite; color: var(--accent-light); }
 @keyframes blink{ 50%{ opacity: 0; } }
 
@@ -684,15 +688,24 @@ input, textarea{ font-family: inherit; }
   width: 100%;
   overflow: hidden;
   position: relative;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 10%, transparent), color-mix(in srgb, var(--accent) 10%, transparent));
+  border-bottom: 1px solid var(--border);
 }
-
+.project-card__media-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-size: 4rem;
+  opacity: .15;
+}
 .project-card__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 .project-card:hover .project-card__media img{ transform: scale(1.05); }
-
 .project-card__body{ padding: 24px; }
 .project-card__body h3{ font-size: 1.2rem; margin-bottom: 8px; }
 .project-card__body p{ color: var(--text-secondary); font-size: .95rem; margin-bottom: 16px; }
@@ -733,6 +746,12 @@ input, textarea{ font-family: inherit; }
   border-radius: var(--radius-md);
   background: var(--surface);
   border: 1px solid var(--border);
+  transition: transform .3s var(--ease), border-color .3s ease, box-shadow .3s ease;
+}
+.timeline__card:hover{
+  transform: translateX(4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 .timeline__year{
   display: inline-block;
@@ -762,12 +781,18 @@ input, textarea{ font-family: inherit; }
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  max-width: 720px;      /* sebelumnya 760px → sama dengan lebar kartu timeline */
-  margin-left: 40px;     /* baru → tepi kiri sejajar dengan kartu timeline */
+  max-width: 720px;
+  margin-left: 40px;
   padding: 24px;
   border-radius: var(--radius-md);
   background: var(--surface);
   border: 1px solid var(--border);
+  transition: transform .3s var(--ease), border-color .3s ease, box-shadow .3s ease;
+}
+.education-card:hover{
+  transform: translateX(4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 .education-card__icon{
   flex-shrink: 0;
@@ -776,6 +801,11 @@ input, textarea{ font-family: inherit; }
   border-radius: 12px;
   background: color-mix(in srgb, var(--primary) 14%, transparent);
   color: var(--primary-light);
+  transition: transform .35s var(--ease), background .35s ease, color .35s ease;
+}
+.education-card:hover .education-card__icon{
+  transform: scale(1.1) rotate(-6deg);
+  background: color-mix(in srgb, var(--primary) 22%, transparent);
 }
 .education-card h3{ font-size: 1.1rem; margin-bottom: 4px; }          /* sebelumnya 1.05rem */
 .education-card__org{ display: block; color: var(--text-muted); font-size: .88rem; margin-bottom: 12px; }  /* .86rem, 10px */
@@ -1036,6 +1066,7 @@ a.contact__row:hover{ border-color: var(--border-strong); transform: translateX(
 .cert-card:hover {
   transform: translateY(-4px);
   border-color: var(--primary);
+  box-shadow: var(--shadow-md);
 }
 
 .cert-icon {
@@ -1047,7 +1078,16 @@ a.contact__row:hover{ border-color: var(--border-strong); transform: translateX(
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: transform .4s var(--ease), background .4s ease, color .4s ease;
 }
+.cert-card:hover .cert-icon{ transform: scale(1.12) rotate(8deg); }
+
+/* Tema warna per kategori sertifikat */
+.cert-icon--cloud{ background: color-mix(in srgb, #0ea5e9 18%, transparent); color: #0ea5e9; }
+.cert-icon--code{ background: color-mix(in srgb, #8b5cf6 18%, transparent); color: #8b5cf6; }
+.cert-icon--security{ background: color-mix(in srgb, #f59e0b 18%, transparent); color: #f59e0b; }
+.cert-icon--cyber{ background: color-mix(in srgb, #ef4444 18%, transparent); color: #ef4444; }
+.cert-icon--softskill{ background: color-mix(in srgb, #14b8a3 18%, transparent); color: #14b8a3; }
 
 .cert-content h3 {
   font-size: 1.1rem;
@@ -1122,4 +1162,96 @@ a.contact__row:hover{ border-color: var(--border-strong); transform: translateX(
 
 @media (prefers-reduced-motion: reduce){
   .hero__photo-glow{ animation: none; }
+}
+
+/* ===== 12. MOBILE PERFORMANCE OPTIMIZATIONS ===== */
+/* Matikan efek visual mahal di mobile agar tidak lag di hp lemah */
+@media (max-width: 860px) {
+  /* Layer latar belakang animasi dengan blur(50px) sangat mahal di mobile GPU */
+  body::before,
+  body::after { display: none; }
+
+  /* Hero blobs pakai filter:blur(120px) + animasi — biaya GPU eksminal di mobile */
+  .hero__blob,
+  .hero__grid,
+  .hero__photo-glow { display: none; }
+
+  /* Matikan backdrop-filter di mobile (tidak di-optimize oleh kebanyakan browser mobile) */
+  .navbar.is-scrolled,
+  .status-pill,
+  .hero__badge {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  /* Smooth scroll bisa cause jank di browser mobile tertentu */
+  html { scroll-behavior: auto; }
+
+  /* Non-aktifkan animasi yang cost di mobile */
+  .hero__photo-frame { animation: none; box-shadow: var(--shadow-sm); }
+  .btn--primary::after { display: none; }
+  .skill-card:hover .skill-card__icon { transform: none; }
+  .project-card:hover .project-card__media img { transform: none; }
+  .skill-card:hover { transform: none; box-shadow: none; }
+  .project-card:hover { transform: none; box-shadow: none; }
+  .cert-card:hover .cert-icon { transform: none; }
+  .timeline__card:hover { transform: none; box-shadow: none; }
+  .education-card:hover { transform: none; box-shadow: none; }
+
+  /* content-visibility: hemat render off-screen content */
+  /* contain-intrinsic-size: hindari layout shift saat content di-render */
+  section { content-visibility: auto; contain-intrinsic-size: 600px; }
+}
+
+/* QR Code Portfolio */
+.portfolio-qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    max-width: 280px;
+    margin: 35px auto 0;
+    padding: 20px 16px;
+    border: 1px solid rgba(128, 128, 128, 0.22);
+    border-radius: 14px;
+}
+
+.portfolio-qr h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.portfolio-qr p {
+    margin: 0 0 5px;
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+.portfolio-qr img {
+    display: block;
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    padding: 5px;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+}
+
+.portfolio-qr img:hover {
+    transform: scale(1.04);
+}
+
+@media (max-width: 480px) {
+    .portfolio-qr {
+        margin-top: 25px;
+        padding: 16px 12px;
+    }
+
+    .portfolio-qr img {
+        width: 100px;
+        height: 100px;
+    }
 }
